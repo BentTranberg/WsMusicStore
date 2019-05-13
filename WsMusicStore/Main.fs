@@ -7,6 +7,7 @@ open WebSharper.UI.Server
 
 type EndPoint =
     | [<EndPoint "/">] Home
+    | [<EndPoint "/demo">] Demo
     | [<EndPoint "/about">] About
 
 module Templating =
@@ -22,6 +23,7 @@ module Templating =
              ]
         [
             "Home" => EndPoint.Home
+            "Demo" => EndPoint.Demo
             "About" => EndPoint.About
         ]
 
@@ -39,6 +41,13 @@ module Site =
 
     let HomePage ctx =
         Templating.Main ctx EndPoint.Home "Home" [
+            h1 [] [text "Home page"]
+            p [] [a [attr.href (ctx.Link EndPoint.Demo)] [text "Demo"]]
+            p [] [a [attr.href (ctx.Link EndPoint.About)] [text "About"]]
+        ]
+
+    let DemoPage ctx =
+        Templating.Main ctx EndPoint.Demo "Demo" [
             h1 [] [text "Say Hi to the server!"]
             div [] [client <@ Client.Main() @>]
         ]
@@ -47,12 +56,14 @@ module Site =
         Templating.Main ctx EndPoint.About "About" [
             h1 [] [text "About"]
             p [] [text "This is a template WebSharper client-server application."]
+            p [] [a [attr.href (ctx.Link EndPoint.Home)] [text "Back to Home page."]]
         ]
 
     let Main =
         Application.MultiPage (fun ctx endpoint ->
             match endpoint with
             | EndPoint.Home -> HomePage ctx
+            | EndPoint.Demo -> DemoPage ctx
             | EndPoint.About -> AboutPage ctx
         )
 
